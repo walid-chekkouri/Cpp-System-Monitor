@@ -87,9 +87,10 @@ cpu  74608   2520   24433   1117073   6176   4054  0        0      0      0
 vector<double> Processor::getVectorFromFile() 
 {
 	
-	vector<double> cpuStats;
-	double cpuValue;
-	string line, filterKey;
+vector<double> cpuStats;
+	
+  double cpuValue;
+  string line, filterKey;
   
  
   
