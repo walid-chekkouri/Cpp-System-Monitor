@@ -12,6 +12,11 @@ using std::ifstream;
 using std::getline;
 using std::istringstream;
 
+
+/*
+Calculation formulas can found here:
+https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
+*/
 double Processor::Utilization() 
 {
   vector<double> processorStats = getVectorFromFile();
@@ -82,10 +87,10 @@ cpu  74608   2520   24433   1117073   6176   4054  0        0      0      0
 vector<double> Processor::getVectorFromFile() 
 {
 	
-  vector<double> cpuStats;
-	
-  double cpuValue;
-  string line, filterKey;
+	vector<double> cpuStats;
+	double cpuValue;
+	string line, filterKey;
+  
  
   
   ifstream myFilestream(LinuxParser::kProcDirectory + LinuxParser::kStatFilename);
