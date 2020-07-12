@@ -72,7 +72,67 @@ vector<int> LinuxParser::Pids() {
 }
 
 // TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+float LinuxParser::MemoryUtilization() 
+{
+
+ 
+ string line, trash, memTotal,memFree;
+ int memTotalVal, memFreeVal;
+
+std::ifstream in(kProcDirectory + kMeminfoFilename);
+  if(!in) 
+  {
+     // cout << "Cannot open input file.\n";
+      return -1;
+  }
+
+  while(getline(in, line))
+  {
+    stringstream ss(line);
+
+    string stringTemp;
+    int stringTempVal;
+    string trash;
+
+    while(ss>>stringTemp>>stringTempVal>>trash)
+    {
+
+      if(stringTemp==filterMemTotalString)
+      {
+      memTotalVal = stringTempVal;
+      memTotal = stringTemp;
+      }
+      else if(stringTemp==filterMemFreeString)
+      {
+        memFreeVal = stringTempVal;
+        memFree = stringTemp;
+
+      }
+      else
+        break;
+
+
+
+    }
+  }
+
+    // calculations: 
+    /*https://stackoverflow.com/questions/41224738/how-to-calculate-system-memory-usage-from-proc-meminfo-like-htop/41251290#41251290
+
+    Total used memory = MemTotal - MemFree
+Non cache/buffer memory (green) = Total used memory - (Buffers + Cached memory)
+Buffers (blue) = Buffers
+Cached memory (yellow) = Cached + SReclaimable - Shmem
+Swap = SwapTotal - SwapFree
+    */
+    float total = memTotalVal;
+    float free = memFreeVal;
+    float used = total - free;
+    float result =  used / total;
+
+return result;
+}
+
 
 // TODO: Read and return the system uptime
 long LinuxParser::UpTime() { return 0; }
