@@ -166,7 +166,100 @@ long LinuxParser::ActiveJiffies() { return 0; }
 long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<string> LinuxParser::CpuUtilization() 
+{ 
+  string line,filter, vuser, vnice, vsystem, vidle, viowait, virq, vsoftirq, vsteal, vguest,vguest_nice;
+  vector<string> cpuStats{};
+  
+  std::ifstream fStream(kProcDirectory + kStatFilename);
+  if (fStream) 
+  {
+    while (std::getline(fStream, line)) 
+	{
+      std::istringstream ss(line);
+      while (ss >> filter >> vuser >> vnice >> vsystem >> vidle >>viowait >> virq >> vsoftirq >> vsteal >> vguest >> vguest_nice) 
+	  {
+        if (filter == filterCpu) 
+		{
+          cpuStats.push_back(vuser);
+          cpuStats.push_back(vnice);
+          cpuStats.push_back(vsystem);
+          cpuStats.push_back(vidle);
+          cpuStats.push_back(viowait);
+          cpuStats.push_back(virq);
+          cpuStats.push_back(vsoftirq);
+          cpuStats.push_back(vsteal);
+          cpuStats.push_back(vguest);
+          cpuStats.push_back(vguest_nice);
+		  
+          return cpuStats;
+        }
+		else{return {};}
+      }
+    }
+  }
+  
+  return {};
+	
+}
+
+
+float LinuxParser::CpuUtilization(int pid) 
+{
+	/*
+		Operations can be found here:
+		https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+	*/
+	float cpuUsagePercentage=0;
+	//////////
+    std::string line, trash;
+	std::string path = "/proc/" + std::to_string(pid) + "/stat";
+	
+	long uTime, sTime, cUtime, csTime, startTime, seconds;
+	const int hertz=100;
+	
+	std::ifstream in(path);
+	
+	if (in)
+	{
+		std::getline(in,line);
+		std::istringstream ss(line);
+		
+		for (int i = 0; i < 13; i++)
+			ss >> trash;
+		
+		ss >> uTime >> sTime >> cUtime >> csTime;
+		
+		for (int i = 0; i < 4; i++)
+			ss >> trash;
+
+		ss >> startTime;
+		
+		
+		//First we determine the total time spent for the process
+		long total_time  = uTime + sTime + cUtime + csTime;
+		
+		
+		//The we calculate the seconds = uptime - (starttime / Hertz)
+		seconds = LinuxParser::UpTime(pid) - (startTime)/hertz;
+		
+		if(seconds==0)
+			return 0;
+		
+		//Finally we calculate the CPU usage percentage:
+		cpuUsagePercentage = (float) (( (total_time) /hertz ) /seconds);
+		return  cpuUsagePercentage;
+
+	}
+	return cpuUsagePercentage;
+
+
+	
+	
+  
+}
+
+
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() { return 0; }
