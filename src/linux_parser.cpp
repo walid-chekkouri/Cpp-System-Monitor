@@ -135,7 +135,22 @@ return result;
 
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime() { return 0; }
+long LinuxParser::UpTime() 
+{ 
+  string line;
+  long upTime = 0;
+  
+  std::ifstream ss(kProcDirectory + "." + kUptimeFilename);
+  
+  if (ss) 
+  {
+    std::getline(ss, line);
+    std::istringstream linestream(line);
+    linestream >> upTime;
+  }
+
+  return upTime;
+}
 
 // TODO: Read and return the number of jiffies for the system
 long LinuxParser::Jiffies() { return 0; }
